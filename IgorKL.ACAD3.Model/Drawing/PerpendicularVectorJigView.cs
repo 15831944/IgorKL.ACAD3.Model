@@ -77,17 +77,22 @@ namespace IgorKL.ACAD3.Model.Drawing
                 /*if (_jigPoint.IsEqualTo(_jigBasePoint))
                     return false;*/
 
-                Polyline pline = _baseCurve.ConvertToPolyline();
+                //Polyline pline = _baseCurve.ConvertToPolyline();
 
-                Line line = pline.GetOrthoNormalLine(_jppr.Value, null, false);
+                //Line line = pline.GetOrthoNormalLine(_jppr.Value, null, false);
+                Line line = new Line(_jppr.Value, _baseCurve.GetClosestPointTo(_jppr.Value, false));
                 if (line != null)
                 {
-                    _jigBasePoint = line.StartPoint;
-                    _jigPoint = line.EndPoint;
+                    _jigPoint = line.StartPoint;
+                    _jigBasePoint = line.EndPoint;
                 }
                 else
                     //throw new ArgumentNullException();
                     return false;
+
+                /*_jigBasePoint = _jppr.Value;
+                _jigPoint = _baseCurve.GetClosestPointTo(_jigBasePoint, false);*/
+
                 try
                 {
                     _entityInMemory = new Line(_jigPoint, _jigBasePoint);

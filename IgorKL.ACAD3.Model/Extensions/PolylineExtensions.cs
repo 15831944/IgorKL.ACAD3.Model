@@ -439,7 +439,7 @@ namespace IgorKL.ACAD3.Model.Extensions
                 return res[0];
             }
         }
-
+        [Obsolete("use getClosestPoint")]
         public static Line GetOrthoNormalLine(this Polyline pline, Point3d point, Plane plane = null ,bool nullForOutOfRange = true)
         {
             point = point.OrthoProject(pline.GetPlane());
@@ -481,6 +481,7 @@ namespace IgorKL.ACAD3.Model.Extensions
                 throw new ArgumentException();
         }
 
+        [Obsolete("use getClosestPoint")]
         public static Point3d? GetOrthoNormalPoint(this Line line, Point3d point, Plane plane = null, bool nullForOutOfRange = true)
         {
             if (plane == null)
