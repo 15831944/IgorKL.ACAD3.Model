@@ -22,7 +22,6 @@ C:\Users\Igor\Source\Workspaces\IgorKL.ACAD\IgorKL.ACAD3.Model\IgorKL.ACAD3.Mode
 C:\Users\Igor\Source\Workspaces\IgorKL.ACAD\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\obj\Debug\IgorKL.ACAD3.Model.pdb
 C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\bin\Debug\IgorKL.ACAD3.Model.dll
 C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\bin\Debug\IgorKL.ACAD3.Model.pdb
-C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\obj\Debug\IgorKL.ACAD3.Model.csprojResolveAssemblyReference.cache
 C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\obj\Debug\Drawing\Views\EntitiesRandomEditorView.baml
 C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\obj\Debug\CivilSurfaces\Views\SurfaceSelectorUserControl.g.cs
 C:\Users\Игорь\Source\Repos\IgorKL.ACAD3.Model\IgorKL.ACAD3.Model\obj\Debug\Drawing\Views\AnchorArrowView.g.cs

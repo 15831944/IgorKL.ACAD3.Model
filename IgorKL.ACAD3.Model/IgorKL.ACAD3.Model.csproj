@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcadBlocks\BlockTools.cs" />
+    <Compile Include="AcadEnvironments.cs" />
     <Compile Include="AcadPoints\PointFactory.cs" />
     <Compile Include="AutocadVersionNotSupportException.cs" />
     <Compile Include="CivilSurfaces\Views\FormSelect.cs">
@@ -225,6 +226,8 @@
     <Compile Include="CogoPoints\Views\PointStylesSelectorControl.xaml.cs">
       <DependentUpon>PointStylesSelectorControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ForVsnk\FullExplode.cs" />
+    <Compile Include="ForVsnk\RemoveProxyEntities.cs" />
     <Compile Include="Helpers\Display\DynamicTransient.cs" />
     <Compile Include="Helpers\Display\SimpleDynamicTransient.cs" />
     <Compile Include="Helpers\Geometry\Intersects.cs" />
@@ -251,6 +254,7 @@
     <Compile Include="ToHelpOthers\Grotesk_PerpendicularToEntity.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools2.cs" />
     <Compile Include="VisualAcadPropertyAttribute.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
-
 using IgorKL.ACAD3.Model.Extensions;
 
 namespace IgorKL.ACAD3.Model
@@ -125,8 +119,6 @@ namespace IgorKL.ACAD3.Model
             List<ObjectId> res = new List<ObjectId>();
             Tools.StartTransaction(() =>
                 {
-
-
                     Transaction trans = HostApplicationServices.WorkingDatabase.TransactionManager.TopTransaction;
                     BlockTableRecord btr = GetAcadBlockTableRecordCurrentSpace(trans, HostApplicationServices.WorkingDatabase, OpenMode.ForWrite);
 
@@ -137,6 +129,25 @@ namespace IgorKL.ACAD3.Model
                     }
 
                 });
+            return res;
+        }
+
+        public static List<ObjectId> AppendEntity2<T>(IEnumerable<T> entities)
+    where T : Entity
+        {
+            List<ObjectId> res = new List<ObjectId>();
+            Tools2.StartTransaction(() =>
+            {
+                Transaction trans = HostApplicationServices.WorkingDatabase.TransactionManager.TopTransaction;
+                BlockTableRecord btr = GetAcadBlockTableRecordCurrentSpace(trans, HostApplicationServices.WorkingDatabase, OpenMode.ForWrite);
+
+                foreach (var ent in entities)
+                {
+                    res.Add(btr.AppendEntity(ent));
+                    trans.AddNewlyCreatedDBObject(ent, true);
+                }
+
+            });
             return res;
         }
 
@@ -250,6 +261,7 @@ namespace IgorKL.ACAD3.Model
             return acNewDoc;
         }
 
+        [Obsolete]
         public static ObjectId StartTransaction<T>(T state, TransactionProcess<T> transProcess)
         {
             using (Transaction trans = StartTransaction())
@@ -257,7 +269,7 @@ namespace IgorKL.ACAD3.Model
                 return transProcess(state, trans, true);
             }
         }
-
+        [Obsolete]
         public static void StartOpenCloseTransaction<T>(T state, TransactionOpenCloseProcess<T> transProcess)
         {
             using (Transaction trans = StartOpenCloseTransaction())
@@ -265,8 +277,8 @@ namespace IgorKL.ACAD3.Model
                 transProcess(state, trans, true);
             }
         }
-
-        public static void StartTransaction(Action process)
+        [Obsolete]
+        public static void StartTransactionEx(Action process)
         {
             using (Transaction trans = StartTransaction())
             {
@@ -274,11 +286,80 @@ namespace IgorKL.ACAD3.Model
                 trans.Commit();
             }
         }
-        public static void StartOpenCloseTransaction(Action process)
+        public static void StartTransaction(Action process)
+        {
+            StartTransaction(trans =>
+            {
+                process();
+            });
+        }
+        public static void StartTransaction(Action<Transaction> process)
+        {
+            var db = AcadEnvironments.Database;
+            Transaction trans = db.TransactionManager.StartTransaction();
+            try
+            {
+                process(trans);
+                trans.Commit();
+            }
+            catch (Autodesk.AutoCAD.Runtime.Exception acadError)
+            {
+                Tools.Write($"\n{acadError.Message}\n{acadError.ErrorStatus}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Write($"\n{ex.Message}\n{ex.StackTrace}\n{process.ToString()}", "Transaction error");
+                System.Diagnostics.Debug.Print($"Transaction error - {process.ToString()}");
+                Tools.Write($"\n{ex.Message}\n");
+            }
+            finally
+            {
+                if (trans != null && !trans.IsDisposed)
+                {
+                    try
+                    {
+                        trans.Abort();
+                    }
+                    catch (Exception) { }
+                    trans.Dispose();
+                }
+                trans = null;
+            }
+        }
+        [Obsolete]
+        public static void StartOpenCloseTransactionEx(Action process)
         {
             using (Transaction trans = StartOpenCloseTransaction())
             {
                 process();
+            }
+        }
+        public static void StartOpenCloseTransaction(Action process)
+        {
+            var db = AcadEnvironments.Database;
+            Transaction trans = db.TransactionManager.StartOpenCloseTransaction();
+            try
+            {
+                process();
+                trans.Commit();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Write($"\n{ex.Message}\n{ex.StackTrace}\n{process.ToString()}", "Transaction error");
+                System.Diagnostics.Debug.Print($"Transaction error - {process.ToString()}");
+            }
+            finally
+            {
+                if (trans != null && !trans.IsDisposed)
+                {
+                    try
+                    {
+                        trans.Abort();
+                    }
+                    catch (Exception) { }
+                    trans.Dispose();
+                }
+                trans = null;
             }
         }
 
@@ -310,5 +391,6 @@ namespace IgorKL.ACAD3.Model
                 config.setHardwareAcceleration(true);
             }
         }*/
+
     }
 }
