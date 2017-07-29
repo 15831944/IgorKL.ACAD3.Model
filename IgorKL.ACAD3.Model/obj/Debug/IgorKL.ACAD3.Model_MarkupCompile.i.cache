@@ -16,5 +16,5 @@ DEBUG;TRACE
 21886994719
 CivilSurfaces\Views\SurfaceSelectorUserControl.xaml;Drawing\Views\AnchorArrowView.xaml;Drawing\Views\EntitiesRandomEditorView.xaml;CogoPoints\Views\PointStylesSelectorControl.xaml;
 
-True
+False
 
