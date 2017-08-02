@@ -121,7 +121,7 @@ namespace IgorKL.ACAD3.Model.Drawing
         {
             Tools.StartTransaction(() =>
             {
-                var btrId = AcadBlocks.BlockTools.CreateBlockTableRecord("*U", Point3d.Origin, entities, AnnotativeStates.True);
+                var btrId = AcadBlocks.BlockTools.CreateBlockTableRecord("*U", /*Point3d.Origin*/_lowerPointUcs, entities, AnnotativeStates.True);
                 //var brId = AcadBlocks.BlockTools.AppendBlockItem(_lowerPointUcs.TransformBy(_ucs.Inverse()), btrId, null, Matrix3d.Identity);
                 var brId = AcadBlocks.BlockTools.AppendBlockItem(_lowerPointUcs, btrId, null, Ucs);
                 BlockReference br = brId.GetObjectForRead<BlockReference>();

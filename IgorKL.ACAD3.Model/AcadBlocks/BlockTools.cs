@@ -134,10 +134,8 @@ namespace IgorKL.ACAD3.Model.AcadBlocks
         {
             ObjectId btrId = ObjectId.Null;
 
-            Tools.StartTransaction(() =>
+            Tools.StartTransaction((trans, doc) =>
                 {
-                    Transaction trans = Tools.GetAcadDatabase().TransactionManager.TopTransaction;
-
                     var bt = Tools.GetAcadDatabase().BlockTableId.GetObjectForRead<BlockTable>();
 
                     if (name != "*U")

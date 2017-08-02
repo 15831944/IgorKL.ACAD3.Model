@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using IgorKL.ACAD3.Model.Extensions;
+using System.Threading.Tasks;
 
 namespace IgorKL.ACAD3.Model
 {
@@ -117,39 +118,22 @@ namespace IgorKL.ACAD3.Model
             where T:Entity
         {
             List<ObjectId> res = new List<ObjectId>();
-            Tools.StartTransaction(() =>
+            Database db = AcadEnvironments.Database;
+            bool isToplevelTrans = db.TransactionManager.NumberOfActiveTransactions > 0;
+            Tools.StartTransaction((trans, doc, blockTbl, blockTblRec) =>
                 {
-                    Transaction trans = HostApplicationServices.WorkingDatabase.TransactionManager.TopTransaction;
-                    BlockTableRecord btr = GetAcadBlockTableRecordCurrentSpace(trans, HostApplicationServices.WorkingDatabase, OpenMode.ForWrite);
-
                     foreach (var ent in entities)
                     {
-                        res.Add(btr.AppendEntity(ent));
+                        res.Add(blockTblRec.AppendEntity(ent));
                         trans.AddNewlyCreatedDBObject(ent, true);
                     }
-
+                    return true;
+                }, (err, trans) => {
+                    return !isToplevelTrans;
                 });
             return res;
         }
 
-        public static List<ObjectId> AppendEntity2<T>(IEnumerable<T> entities)
-    where T : Entity
-        {
-            List<ObjectId> res = new List<ObjectId>();
-            Tools2.StartTransaction(() =>
-            {
-                Transaction trans = HostApplicationServices.WorkingDatabase.TransactionManager.TopTransaction;
-                BlockTableRecord btr = GetAcadBlockTableRecordCurrentSpace(trans, HostApplicationServices.WorkingDatabase, OpenMode.ForWrite);
-
-                foreach (var ent in entities)
-                {
-                    res.Add(btr.AppendEntity(ent));
-                    trans.AddNewlyCreatedDBObject(ent, true);
-                }
-
-            });
-            return res;
-        }
 
         /*public static ObjectId AppendEntity(Database db, Entity entity)
         {
@@ -288,43 +272,20 @@ namespace IgorKL.ACAD3.Model
         }
         public static void StartTransaction(Action process)
         {
-            StartTransaction(trans =>
+            StartTransaction((trans, doc) =>
             {
                 process();
             });
         }
-        public static void StartTransaction(Action<Transaction> process)
+        public static void StartTransaction(Action<Transaction, Document> process)
         {
-            var db = AcadEnvironments.Database;
-            Transaction trans = db.TransactionManager.StartTransaction();
-            try
+            StartTransaction((trans, doc, acBlkTbl, acBlkTblRec) =>
             {
-                process(trans);
-                trans.Commit();
-            }
-            catch (Autodesk.AutoCAD.Runtime.Exception acadError)
-            {
-                Tools.Write($"\n{acadError.Message}\n{acadError.ErrorStatus}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.Write($"\n{ex.Message}\n{ex.StackTrace}\n{process.ToString()}", "Transaction error");
-                System.Diagnostics.Debug.Print($"Transaction error - {process.ToString()}");
-                Tools.Write($"\n{ex.Message}\n");
-            }
-            finally
-            {
-                if (trans != null && !trans.IsDisposed)
-                {
-                    try
-                    {
-                        trans.Abort();
-                    }
-                    catch (Exception) { }
-                    trans.Dispose();
-                }
-                trans = null;
-            }
+                process(trans, doc);
+                return true;    // Commit == true, виксирует изменения в транзакции
+            }, (err, trans) => {
+                return true;    // Dispose with abort == true
+            });
         }
         [Obsolete]
         public static void StartOpenCloseTransactionEx(Action process)
@@ -361,6 +322,87 @@ namespace IgorKL.ACAD3.Model
                 }
                 trans = null;
             }
+        }
+
+        /// <summary>
+        /// Выполняет транзакцию
+        /// </summary>
+        /// <param name="process">Процесс выполнения (return - commit == true)</param>
+        /// <param name="callback">Процедура обратного вызова, анализ ошибок (return dispose with abort == true)</param>
+        public static void StartTransaction(Func<Transaction, Document, BlockTable, BlockTableRecord, bool> process, Func<Exception, Transaction, bool> callback = null, bool isOpenCloseTrans=false)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database;
+            bool commit = true;
+            Exception error = null;
+
+            Transaction trans = !isOpenCloseTrans ? db.TransactionManager.StartTransaction()
+                : db.TransactionManager.StartOpenCloseTransaction();
+            Tools.Write($"\nLog - {trans.AutoDelete}\n");
+            try
+            {
+                BlockTable acBlkTbl = trans.GetObject(db.BlockTableId,
+                                                OpenMode.ForRead) as BlockTable;
+                BlockTableRecord acBlkTblRec = trans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace],
+                                                OpenMode.ForWrite) as BlockTableRecord;
+                commit = process != null && process(trans, doc ,acBlkTbl, acBlkTblRec);
+                if (commit)
+                {
+                    try
+                    {
+                        trans.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        Tools.Write($"\nCommit error (from transaction) - {ex.Message}\n");
+                        try
+                        {
+                            trans.Abort();
+                        }
+                        catch (Exception abortEx)
+                        {
+                            Tools.Write($"\nAbort exception (from transaction) - {abortEx.Message}\n");
+                        }
+                    }
+                }
+                    
+            }
+            catch (Autodesk.AutoCAD.Runtime.Exception acadError)
+            {
+                Tools.Write($"\n{acadError.Message}\n{acadError.ErrorStatus}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Write($"\n{ex.Message}\n{ex.StackTrace}\n{process.ToString()}", "Transaction error");
+                System.Diagnostics.Debug.Print($"Transaction error - {process.ToString()}");
+                Tools.Write($"\n{ex.Message}\n");
+            }
+            finally
+            {
+                bool dispose = callback == null ? true :
+                    callback(error, trans);
+
+                if (dispose && trans != null && !trans.IsDisposed)
+                {
+                    trans.Dispose();
+                }
+                trans = null;
+            }
+        }
+
+        public static ViewportTableRecord GetViewportTblRec(Transaction trans, Document doc, OpenMode mode = OpenMode.ForRead)
+        {
+            ViewportTableRecord acVportTblRec = trans.GetObject(doc.Editor.ActiveViewportId,
+                                  mode) as ViewportTableRecord;
+            return acVportTblRec;
+        }
+
+        public static LayerTable GetLayerTable(Transaction trans, Document doc, OpenMode mode = OpenMode.ForRead)
+        {
+            LayerTable acLyrTbl;
+            acLyrTbl = trans.GetObject(doc.Database.LayerTableId,
+                                            mode) as LayerTable;
+            return acLyrTbl;
         }
 
         public static Transaction GetTopTransaction()

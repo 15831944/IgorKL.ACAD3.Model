@@ -45,7 +45,7 @@ namespace IgorKL.ACAD3.Model.ForVsnk
                             List<Entity> buffer = wheleExplode(ent);
                             if (buffer.Count > 0)
                             {
-                                Tools.AppendEntity2(buffer);
+                                Tools.AppendEntity(buffer);
                                 return true;
                             }
                         }
