@@ -205,7 +205,7 @@
       <DependentUpon>EntitiesRandomEditorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Drawing\WallDeviationArrows.cs" />
-    <Compile Include="Drawing\WallDeviationArrows2.cs" />
+    <Compile Include="Drawing\WallDeviationArrowsEx.cs" />
     <Compile Include="Drawing\Сartogramma2.cs" />
     <Compile Include="Drawing\Сartogramma.cs" />
     <Compile Include="Extensions\AcadCollectionExtensions.cs" />
@@ -213,6 +213,7 @@
     <Compile Include="Extensions\BlockExtensions.cs" />
     <Compile Include="Extensions\CivilSurfaceExtensions.cs" />
     <Compile Include="Extensions\CurveExtension.cs" />
+    <Compile Include="Extensions\CustomizationExtensions.cs" />
     <Compile Include="Extensions\DBObjectExtensions.cs" />
     <Compile Include="Extensions\DBTextExtensions.cs" />
     <Compile Include="Extensions\EntityExtensions.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="Helpers\Display\DynamicTransient.cs" />
     <Compile Include="Helpers\Display\SimpleDynamicTransient.cs" />
     <Compile Include="Helpers\Geometry\Intersects.cs" />
+    <Compile Include="Helpers\Math\Algorithms.cs" />
     <Compile Include="Helpers\Math\Calculator.cs" />
     <Compile Include="Helpers\Math\Randoms.cs" />
     <Compile Include="Helpers\Math\Statistical.cs" />

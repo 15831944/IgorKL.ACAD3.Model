@@ -1,10 +1,8 @@
 
 
-ФАТАЛЬНАЯ ОШИБКА:  Unhandled e0434352h Exception at b1273c58h
+ФАТАЛЬНАЯ ОШИБКА:  Unhandled Access Violation Reading 0x0008 Exception at 767f56efh
 
-08/02/2017 at 22:07:21.000  Чертеж: Чертеж1.dwg
--------------
-1.dwg
+08/05/2017 at 01:41:37.000  Чертеж: Чертеж1.dwg
 -------------
 -
 dwg
